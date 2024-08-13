@@ -14,10 +14,14 @@ export interface IUser {
   email: string;
 }
 
+interface IUsersData {
+  [key: string]: IUser;
+}
+
 export interface IChatRoom {
   id?: string;
   users: string![];
-  usersData: any;
+  usersData: IUsersData;
   timestamp: Date;
   lastMessage: string;
   myData?: IUser;

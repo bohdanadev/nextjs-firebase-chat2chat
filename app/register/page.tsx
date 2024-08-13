@@ -1,14 +1,12 @@
 "use client";
 import { useState, useEffect, FC, FormEvent } from "react";
-import { auth, firestore } from "@/lib/firebase";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
 import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { generateRandomAvatar } from "@/lib/helpers/generate-avatar";
 import Spinner from "../../components/spinner";
 import { registerSchema } from "@/lib/validators/form-validation";
+import { createUser } from "@/lib/user";
 
 const RegisterPage: FC = () => {
   const [name, setName] = useState<string>("");
@@ -43,20 +41,7 @@ const RegisterPage: FC = () => {
         });
         setErrors(errorObj);
       } else {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-        const user = userCredential.user;
-
-        const docRef = doc(firestore, "users", user.uid);
-        await setDoc(docRef, {
-          name,
-          email: email,
-          avatarUrl,
-          status: "online",
-        });
+        await createUser(email, password, name, avatarUrl);
 
         router.push("/");
         setErrors({});

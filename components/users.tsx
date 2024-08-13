@@ -9,6 +9,8 @@ import {
   serverTimestamp,
   where,
   getDocs,
+  QuerySnapshot,
+  DocumentData,
 } from "firebase/firestore";
 import { getAuth, signOut } from "firebase/auth";
 import { useRouter } from "next/navigation";
@@ -34,23 +36,24 @@ const Users: FC<IProps> = ({ currentUser, setSelectedChatroom }) => {
     setActiveTab(tab);
   };
 
-  //get all users
   useEffect(() => {
     setLoading2(true);
     const tasksQuery = query(collection(firestore, "users"));
 
-    const unsubscribe = onSnapshot(tasksQuery, (snapshot) => {
-      const users = snapshot.docs.map((doc) => {
-        const data = doc.data() as IUser;
-        return { id: doc.id, ...data };
-      });
-      setUsers(users);
-      setLoading2(false);
-    });
+    const unsubscribe = onSnapshot(
+      tasksQuery,
+      (snapshot: QuerySnapshot<DocumentData>) => {
+        const users = snapshot.docs.map((doc) => {
+          const data = doc.data() as IUser;
+          return { id: doc.id, ...data };
+        });
+        setUsers(users);
+        setLoading2(false);
+      }
+    );
     return () => unsubscribe();
   }, []);
 
-  //get chatrooms
   useEffect(() => {
     setLoading(true);
     if (!currentUser?.id) return;
@@ -67,13 +70,10 @@ const Users: FC<IProps> = ({ currentUser, setSelectedChatroom }) => {
       setUserChatrooms(chatrooms);
     });
 
-    // Cleanup function for chatrooms
     return () => unsubscribeChatrooms();
   }, [currentUser]);
 
-  // Create a chatroom
   const createChat = async (user: IUser) => {
-    // Check if a chatroom already exists for these users
     const existingChatroomsQuery = query(
       collection(firestore, "chatrooms"),
       where("users", "==", [currentUser.id, user.id])
@@ -83,12 +83,10 @@ const Users: FC<IProps> = ({ currentUser, setSelectedChatroom }) => {
       const existingChatroomsSnapshot = await getDocs(existingChatroomsQuery);
 
       if (existingChatroomsSnapshot.docs.length > 0) {
-        // Chatroom already exists, handle it accordingly (e.g., show a message)
         toast.error("Chatroom already exists for these users.");
         return;
       }
 
-      // Chatroom doesn't exist, proceed to create a new one
       const usersData = {
         [currentUser.id!]: currentUser,
         [user.id!]: user,
@@ -111,7 +109,6 @@ const Users: FC<IProps> = ({ currentUser, setSelectedChatroom }) => {
     }
   };
 
-  //open chatroom
   const openChat = async (chatroom: IChatRoom) => {
     const otherUser = chatroom.users?.find(
       (id) => id !== currentUser.id

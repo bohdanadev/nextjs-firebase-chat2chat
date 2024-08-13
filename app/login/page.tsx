@@ -1,13 +1,12 @@
 "use client";
 import React, { FC, FormEvent } from "react";
 import { useState } from "react";
-import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Spinner from "../../components/spinner";
 import { baseSchema } from "@/lib/validators/form-validation";
+import { signin } from "@/lib/user";
 
 const LoginPage: FC = () => {
   const [email, setEmail] = useState<string>("");
@@ -31,13 +30,7 @@ const LoginPage: FC = () => {
         });
         setErrors(errorObj);
       } else {
-        const userCredential = await signInWithEmailAndPassword(
-          auth,
-          email,
-          password
-        );
-        const user = userCredential.user;
-        console.log(user);
+        const user = await signin(email, password);
         if (user) {
           router.push("/");
         }

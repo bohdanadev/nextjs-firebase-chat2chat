@@ -1,34 +1,28 @@
 "use client";
 import { FC } from "react";
 import React, { useEffect, useState } from "react";
-import { app, firestore } from "@/lib/firebase";
+import { app } from "@/lib/firebase";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
 import ChatRoom from "../components/chat-room";
 import Users from "../components/users";
 import { IChatRoom, IUser } from "@/types";
+import { getUser } from "@/lib/user";
+import Spinner from "@/components/spinner";
 
 const HomePage: FC = () => {
   const auth = getAuth(app);
   const [currentUser, setCurrentUser] = useState<IUser | null>(null);
-  const router = useRouter();
   const [selectedChatroom, setSelectedChatroom] = useState<IChatRoom | null>(
     null
   );
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        const docRef = doc(firestore, "users", currentUser.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const id = docSnap.id;
-          const data = docSnap.data() as IUser;
-          setCurrentUser({ id, ...data });
-        } else {
-          console.log("No such document!");
-        }
+        const user = (await getUser(currentUser)) as IUser;
+        setCurrentUser(user);
       } else {
         setCurrentUser(null);
         router.push("/login");
@@ -37,11 +31,10 @@ const HomePage: FC = () => {
     return () => unsubscribe();
   }, [auth, router]);
 
-  if (currentUser == null) return <div className="text-4xl">Loading...</div>;
+  if (currentUser == null) return <Spinner />;
 
   return (
     <div className="flex h-screen">
-      {/* Left side users */}
       <div className="flex-shrink-0 w-3/12">
         <Users
           currentUser={currentUser}
@@ -49,7 +42,6 @@ const HomePage: FC = () => {
         />
       </div>
 
-      {/* Right side chat room */}
       <div className="flex-grow w-9/12">
         {selectedChatroom ? (
           <>
