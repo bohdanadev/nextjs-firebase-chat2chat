@@ -6,7 +6,7 @@ import { signInWithEmailAndPassword } from "firebase/auth";
 import { toast } from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Spinner from "../components/spinner";
+import Spinner from "../../components/spinner";
 import { baseSchema } from "@/lib/validators/form-validation";
 
 const LoginPage: FC = () => {

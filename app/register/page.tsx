@@ -7,8 +7,8 @@ import { toast } from "react-hot-toast";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { generateRandomAvatar } from "@/lib/helpers/generate-avatar";
-import Spinner from "../components/spinner";
-import registerSchema from "@/lib/validators/form-validation";
+import Spinner from "../../components/spinner";
+import { registerSchema } from "@/lib/validators/form-validation";
 
 const RegisterPage: FC = () => {
   const [name, setName] = useState<string>("");
